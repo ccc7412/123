@@ -1,0 +1,107 @@
+{
+  "code": 0,
+  "msg": "",
+  "count": 1000,
+  "data": [
+    {
+      "id": 10000,
+      "realname": "张三",
+      "sex": "男",
+      "age": "33",
+      "symptom": "肺炎",
+      "Attendingphysician": "张医生",
+	  "Degree of treatment":"已好转",
+      "telephone": "13545678767"
+    },
+   {
+   "id": 10001,
+   "realname": "李四",
+   "sex": "女",
+   "age": "28",
+   "symptom": "急性支气管炎",
+   "Attendingphysician": "李医生",
+   "Degree of treatment": "治疗中",
+   "telephone": "13890123456"
+   },
+   {
+   "id": 10002,
+   "realname": "王五",
+   "sex": "男",
+   "age": "45",
+   "symptom": "高血压（二级）",
+   "Attendingphysician": "王医生",
+   "Degree of treatment": "血压稳定",
+   "telephone": "13987654321"
+   },
+   {
+   "id": 10003,
+   "realname": "赵六",
+   "sex": "女",
+   "age": "52",
+   "symptom": "2 型糖尿病",
+   "Attendingphysician": "刘医生",
+   "Degree of treatment": "血糖控制良好",
+   "telephone": "13612345678"
+   },
+   {
+   "id": 10004,
+   "realname": "孙七",
+   "sex": "男",
+   "age": "19",
+   "symptom": "病毒性感冒",
+   "Attendingphysician": "陈医生",
+   "Degree of treatment": "已痊愈",
+   "telephone": "13723456789"
+   },
+   {
+   "id": 10005,
+   "realname": "周八",
+   "sex": "女",
+   "age": "36",
+   "symptom": "胃溃疡（轻度）",
+   "Attendingphysician": "黄医生",
+   "Degree of treatment": "已好转",
+   "telephone": "13598765430"
+   },
+   {
+   "id": 10006,
+   "realname": "吴九",
+   "sex": "男",
+   "age": "61",
+   "symptom": "颈椎病（神经根型）",
+   "Attendingphysician": "马医生",
+   "Degree of treatment": "康复中",
+   "telephone": "13487654321"
+   },
+   {
+   "id": 10007,
+   "realname": "郑十",
+   "sex": "女",
+   "age": "22",
+   "symptom": "过敏性鼻炎",
+   "Attendingphysician": "杨医生",
+   "Degree of treatment": "症状缓解",
+   "telephone": "13376543210"
+   },
+   {
+   "id": 10008,
+   "realname": "钱一",
+   "sex": "男",
+   "age": "49",
+   "symptom": "腰椎间盘突出",
+   "Attendingphysician": "何医生",
+   "Degree of treatment": "治疗中",
+   "telephone": "13265432109"
+   },
+   {
+   "id": 10009,
+   "realname": "冯二",
+   "sex": "女",
+   "age": "58",
+   "symptom": "冠心病（稳定型心绞痛）",
+   "Attendingphysician": "罗医生",
+   "Degree of treatment": "病情稳定",
+   "telephone": "13154321098"
+   }
+  ]
+}

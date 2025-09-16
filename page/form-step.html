@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社区医院 - 医生通知中心</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body { background: #f5f7fa; padding: 20px; color: #333; line-height: 1.6; }
+        
+        .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        
+        .header { background: #2c6ed6; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #fff; color: #2c6ed6; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        .main-content { padding: 20px; }
+        .page-title { font-size: 18px; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 20px; }
+        
+        .module { background: #fafbfc; border-radius: 6px; padding: 15px; margin-bottom: 20px; }
+        .module-title { font-size: 16px; font-weight: 500; margin-bottom: 15px; }
+        
+        .setting-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .setting-item:last-child { border-bottom: none; }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; transition: .4s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: #2c6ed6; }
+        input:checked + .slider:before { transform: translateX(24px); }
+        
+        .send-form { display: flex; flex-direction: column; gap: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        input, select, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        textarea { min-height: 100px; resize: vertical; }
+        .send-btn { align-self: flex-start; padding: 10px 20px; background: #2c6ed6; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .send-btn:hover { background: #245abc; }
+        
+        .history-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .history-table th, .history-table td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+        .history-table th { background: #f5f7fa; }
+        
+        .status-tag { display: inline-block; padding: 3px 6px; border-radius: 3px; font-size: 12px; }
+        .status-success { background: #e8f5e9; color: #2e7d32; }
+        
+        .alert { position: fixed; top: 20px; right: 20px; padding: 12px 15px; background: #2c6ed6; color: white; border-radius: 4px; transform: translateX(120%); transition: transform 0.3s; z-index: 1000; }
+        .alert.show { transform: translateX(0); }
+        .doctor-info { margin-top: 5px; font-size: 13px; color: #666; }
+        
+        @media (max-width: 600px) {
+            .header { flex-direction: column; gap: 10px; }
+            .history-table th:nth-child(2), .history-table td:nth-child(2) { display: none; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div class="page-title">医生通知管理</div>
+            <div class="module">
+                <div class="module-title">通知方式设置</div>
+                <div class="setting-item">
+                    <div>新患者挂号通知</div>
+                    <div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <span style="margin:0 10px;">短信</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <span>系统消息</span>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <div>患者取消挂号通知</div>
+                    <div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <span style="margin:0 10px;">短信</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <span>系统消息</span>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <div>排班调整通知</div>
+                    <div>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <span style="margin:0 10px;">短信</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <span>系统消息</span>
+                    </div>
+                </div>
+            </div>
+            <div class="module">
+                <div class="module-title">发送新通知</div>
+                <form class="send-form" id="notifyForm">
+                    <div class="form-group">
+                        <label>选择医生</label>
+                        <select id="doctorSelect" required>
+                            <option value="">-- 请选择医生 --</option>
+                            <option value="1" data-phone="138****1122" data-department="内科">王医生</option>
+                            <option value="2" data-phone="139****3344" data-department="儿科">李医生</option>
+                            <option value="3" data-phone="137****5566" data-department="外科">张医生</option>
+                            <option value="4" data-phone="136****7788" data-department="妇科">陈医生</option>
+                        </select>
+                        <div class="doctor-info" id="doctorDetails">请选择医生查看详情</div>
+                    </div>
+                    <div class="form-group">
+                        <label>通知类型</label>
+                        <select id="notifyType">
+                            <option value="new-patient">新患者挂号通知</option>
+                            <option value="cancel-registration">患者取消挂号</option>
+                            <option value="schedule-change">排班调整通知</option>
+                            <option value="meeting">科室会议通知</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>通知内容</label>
+                        <textarea id="notifyContent" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>发送方式</label>
+                        <div>
+                            <input type="checkbox" id="sms" checked> <label for="sms">短信</label>
+                            <input type="checkbox" id="system" checked style="margin-left:15px;"> <label for="system">系统消息</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="send-btn"><i class="fa fa-paper-plane"></i> 发送</button>
+                </form>
+            </div>
+            <div class="module">
+                <div class="module-title">历史通知记录</div>
+                <table class="history-table">
+                    <thead>
+                        <tr><th>医生</th><th>类型</th><th>内容</th><th>方式</th><th>时间</th><th>状态</th></tr>
+                    </thead>
+                    <tbody id="historyList">
+                        <tr>
+                            <td>王医生(内科)</td>
+                            <td>新患者挂号通知</td>
+                            <td>有新患者张三预约了您5月20日上午的门诊</td>
+                            <td>短信+系统</td>
+                            <td>2024-05-18 14:30</td>
+                            <td><span class="status-tag status-success">已送达</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert" id="alert"></div>
+
+    <script>
+        const doctorSelect = document.getElementById('doctorSelect');
+        const doctorDetails = document.getElementById('doctorDetails');
+        
+        doctorSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                const phone = selectedOption.getAttribute('data-phone');
+                const department = selectedOption.getAttribute('data-department');
+                doctorDetails.textContent = `科室: ${department} | 联系电话: ${phone}`;
+            } else {
+                doctorDetails.textContent = '请选择医生查看详情';
+                document.getElementById('notifyContent').value = '';
+            }
+        });
+        document.getElementById('notifyType').addEventListener('change', fillNotificationTemplate);
+        function fillNotificationTemplate() {
+            const content = document.getElementById('notifyContent');
+            const doctorName = doctorSelect.options[doctorSelect.selectedIndex].text || '';
+            const department = doctorSelect.options[doctorSelect.selectedIndex].getAttribute('data-department') || '';
+            if (!doctorName) return;
+            const date = new Date();
+            date.setDate(date.getDate() + 1);
+            const dateStr = date.toLocaleDateString();
+            const tomorrowMorning = `${dateStr} 上午`;
+            switch(document.getElementById('notifyType').value) {
+                case 'new-patient':
+                    content.value = `${doctorName}您好，有新患者预约了您${tomorrowMorning}的门诊，请做好接诊准备。`;
+                    break;
+                case 'cancel-registration':
+                    content.value = `${doctorName}您好，患者李四已取消预约您${tomorrowMorning}的门诊，请知悉。`;
+                    break;
+                case 'schedule-change':
+                    content.value = `${doctorName}您好，您${dateStr}的排班已调整为下午，请留意门诊安排。`;
+                    break;
+                case 'meeting':
+                    content.value = `${doctorName}您好，${dateStr}下午3点将召开${department}科室会议，请准时参加。`;
+                    break;
+            }
+        }
+        document.getElementById('notifyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const doctorSelect = document.getElementById('doctorSelect');
+            if (!doctorSelect.value) {
+                showAlert('请选择医生');
+                return;
+            }
+            const doctorName = doctorSelect.options[doctorSelect.selectedIndex].text;
+            const department = doctorSelect.options[doctorSelect.selectedIndex].getAttribute('data-department');
+            const doctorFullName = `${doctorName}(${department})`;
+            const type = document.getElementById('notifyType').options[document.getElementById('notifyType').selectedIndex].text;
+            const content = document.getElementById('notifyContent').value;
+            const sms = document.getElementById('sms').checked;
+            const system = document.getElementById('system').checked;
+            if (!sms && !system) { showAlert('请选择发送方式'); return; }
+            if (!content) { showAlert('请输入内容'); return; }
+            const method = (sms && system) ? '短信+系统' : (sms ? '短信' : '系统');
+            const time = new Date().toLocaleString();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${doctorFullName}</td>
+                <td>${type}</td>
+                <td>${content}</td>
+                <td>${method}</td>
+                <td>${time}</td>
+                <td><span class="status-tag status-success">已送达</span></td>
+            `;
+            document.getElementById('historyList').prepend(row);
+            showAlert('通知发送成功');
+            document.getElementById('notifyContent').value = '';
+        });
+        function showAlert(msg) {
+            const alert = document.getElementById('alert');
+            alert.textContent = msg;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
+    

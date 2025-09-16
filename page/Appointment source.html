@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>挂号请求与号源查询</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">挂号请求处理</h2>
+        
+        <!-- 挂号信息表单 -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">选择科室</label>
+                    <select id="department" class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">--请选择科室--</option>
+                        <option value="internal">内科</option>
+                        <option value="surgery">外科</option>
+                        <option value="pediatrics">儿科</option>
+                        <option value="obstetrics">妇产科</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">选择医生</label>
+                    <select id="doctor" class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary" disabled>
+                        <option value="">--请先选择科室--</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">选择日期</label>
+                    <input type="date" id="appointmentDate" class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary" disabled>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">剩余号源</label>
+                    <div id="availability" class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 flex items-center">
+                        <i class="fa fa-spinner fa-spin text-gray-400 mr-2"></i>
+                        <span>请选择医生和日期查询</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button id="checkAvailability" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors mr-2" disabled>
+                    <i class="fa fa-search mr-1"></i> 查询号源
+                </button>
+                <button id="submitRequest" class="px-4 py-2 bg-success text-white rounded hover:bg-success/90 transition-colors" disabled>
+                    <i class="fa fa-check mr-1"></i> 提交挂号请求
+                </button>
+            </div>
+        </div>
+        
+        <!-- 挂号记录 -->
+        <div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">最近挂号请求</h3>
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">医生</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">号源状态</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">请求时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestHistory" class="bg-white divide-y divide-gray-200">
+                        <!-- 记录将通过JS动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据库中的医生和号源数据
+        const doctorData = {
+            internal: [
+                { id: 101, name: "张医生", specialty: "心血管" },
+                { id: 102, name: "王医生", specialty: "消化内科" }
+            ],
+            surgery: [
+                { id: 201, name: "李医生", specialty: "普通外科" },
+                { id: 202, name: "赵医生", specialty: "骨科" }
+            ],
+            pediatrics: [
+                { id: 301, name: "陈医生", specialty: "小儿呼吸" },
+                { id: 302, name: "刘医生", specialty: "小儿神经" }
+            ],
+            obstetrics: [
+                { id: 401, name: "孙医生", specialty: "产科" },
+                { id: 402, name: "周医生", specialty: "妇科" }
+            ]
+        };
+
+        // 模拟号源数据库查询函数
+        function checkDoctorAvailability(doctorId, date) {
+            // 模拟API请求延迟
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    // 随机生成剩余号源（1-10之间）
+                    const randomAvailability = Math.floor(Math.random() * 10) + 1;
+                    resolve(randomAvailability);
+                }, 800);
+            });
+        }
+
+        // 元素引用
+        const departmentSelect = document.getElementById('department');
+        const doctorSelect = document.getElementById('doctor');
+        const dateInput = document.getElementById('appointmentDate');
+        const availabilityDiv = document.getElementById('availability');
+        const checkBtn = document.getElementById('checkAvailability');
+        const submitBtn = document.getElementById('submitRequest');
+        const requestHistory = document.getElementById('requestHistory');
+
+        // 初始化日期为今天
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+
+        // 科室选择变化
+        departmentSelect.addEventListener('change', () => {
+            const dept = departmentSelect.value;
+            doctorSelect.innerHTML = '';
+            
+            if (dept && doctorData[dept]) {
+                doctorSelect.disabled = false;
+                doctorData[dept].forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor.id;
+                    option.textContent = `${doctor.name} (${doctor.specialty})`;
+                    doctorSelect.appendChild(option);
+                });
+                dateInput.disabled = false;
+                checkBtn.disabled = false;
+            } else {
+                doctorSelect.disabled = true;
+                dateInput.disabled = true;
+                checkBtn.disabled = true;
+                submitBtn.disabled = true;
+                availabilityDiv.innerHTML = '<i class="fa fa-info-circle text-gray-400 mr-2"></i><span>请选择医生和日期查询</span>';
+            }
+        });
+
+        // 查询号源
+        checkBtn.addEventListener('click', async () => {
+            const doctorId = doctorSelect.value;
+            const doctorName = doctorSelect.options[doctorSelect.selectedIndex].text.split(' ')[0];
+            const date = dateInput.value;
+            
+            if (!doctorId || !date) return;
+            
+            // 显示加载状态
+            availabilityDiv.innerHTML = '<i class="fa fa-spinner fa-spin text-gray-400 mr-2"></i><span>查询中...</span>';
+            submitBtn.disabled = true;
+            
+            // 查询号源
+            const availability = await checkDoctorAvailability(doctorId, date);
+            
+            // 显示结果
+            if (availability > 0) {
+                availabilityDiv.innerHTML = `<i class="fa fa-check-circle text-success mr-2"></i><span>剩余 ${availability} 个号源</span>`;
+                submitBtn.disabled = false;
+            } else {
+                availabilityDiv.innerHTML = `<i class="fa fa-times-circle text-danger mr-2"></i><span>号源已售罄</span>`;
+                submitBtn.disabled = true;
+            }
+        });
+
+        // 提交挂号请求
+        submitBtn.addEventListener('click', () => {
+            const doctorId = doctorSelect.value;
+            const doctorName = doctorSelect.options[doctorSelect.selectedIndex].text;
+            const date = dateInput.value;
+            const formattedDate = new Date(date).toLocaleDateString();
+            const time = new Date().toLocaleTimeString();
+            
+            // 添加到历史记录
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 transition-colors';
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">${doctorName}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${formattedDate}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">已提交</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${time}</td>
+            `;
+            requestHistory.prepend(row);
+            
+            // 重置表单
+            alert('挂号请求已提交，请等待确认！');
+            departmentSelect.value = '';
+            doctorSelect.innerHTML = '<option value="">--请先选择科室--</option>';
+            doctorSelect.disabled = true;
+            dateInput.disabled = true;
+            checkBtn.disabled = true;
+            submitBtn.disabled = true;
+            availabilityDiv.innerHTML = '<i class="fa fa-info-circle text-gray-400 mr-2"></i><span>请选择医生和日期查询</span>';
+        });
+    </script>
+</body>
+</html>

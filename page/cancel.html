@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>退号申请</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        success: '#10B981',
+                        danger: '#EF4444'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-2xl mx-auto p-4 py-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">退号申请</h1>
+        
+        <!-- 挂号选择 -->
+        <div class="bg-white rounded-lg shadow-sm p-5 mb-5">
+            <label class="block text-gray-700 mb-2 font-medium">选择要取消的挂号</label>
+            <select id="regSelect" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary">
+                <option value="">请选择挂号记录</option>
+                <option value="1" data-date="2023-06-25" data-doctor="刘医生" data-dept="内科">
+                    内科 - 刘医生 (2023-06-25 10:00)
+                </option>
+                <option value="2" data-date="2023-06-23" data-doctor="陈医生" data-dept="皮肤科">
+                    皮肤科 - 陈医生 (2023-06-23 15:30)
+                </option>
+                <option value="3" data-date="2023-06-20" data-doctor="杨医生" data-dept="骨科">
+                    骨科 - 杨医生 (2023-06-20 09:30)
+                </option>
+            </select>
+        </div>
+        
+        <!-- 退号原因 -->
+        <div class="bg-white rounded-lg shadow-sm p-5 mb-5">
+            <label class="block text-gray-700 mb-2 font-medium">退号原因</label>
+            <textarea id="reason" rows="3" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                     placeholder="请简要说明退号原因（选填）"></textarea>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="flex justify-end">
+            <button id="cancelBtn" class="bg-danger text-white py-2 px-6 rounded hover:bg-danger/90 transition-colors">
+                <i class="fa fa-times-circle mr-1"></i> 确认退号
+            </button>
+        </div>
+        
+        <!-- 退号记录 -->
+        <div class="mt-8">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3">退号记录</h2>
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">科室/医生</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">原就诊日</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">退号时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cancelRecords" class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-4 py-3 text-sm">外科 - 王医生</td>
+                            <td class="px-4 py-3 text-sm">2023-06-15</td>
+                            <td class="px-4 py-3 text-sm">2023-06-14 10:23</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="fixed bottom-5 right-5 bg-success text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
+        <i class="fa fa-bell mr-2"></i>
+        <span>退号成功，号源已恢复，通知已发送</span>
+    </div>
+
+    <script>
+        // 元素引用
+        const regSelect = document.getElementById('regSelect');
+        const reason = document.getElementById('reason');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const cancelRecords = document.getElementById('cancelRecords');
+        const notification = document.getElementById('notification');
+
+        // 确认退号
+        cancelBtn.addEventListener('click', () => {
+            const selected = regSelect.options[regSelect.selectedIndex];
+            if (!selected.value) {
+                alert('请选择要取消的挂号记录');
+                return;
+            }
+            
+            const id = selected.value;
+            const doctor = selected.getAttribute('data-doctor');
+            const dept = selected.getAttribute('data-dept');
+            const date = selected.getAttribute('data-date');
+            
+            // 恢复号源（模拟数据库操作）
+            restoreAvailability(id);
+            
+            // 记录退号信息
+            const now = new Date();
+            const cancelTime = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${now.toLocaleTimeString()}`;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-4 py-3 text-sm">${dept} - ${doctor}</td>
+                <td class="px-4 py-3 text-sm">${date}</td>
+                <td class="px-4 py-3 text-sm">${cancelTime}</td>
+            `;
+            cancelRecords.prepend(row);
+            
+            // 触发通知
+            triggerNotification();
+            
+            // 重置表单
+            regSelect.value = '';
+            reason.value = '';
+        });
+
+        // 恢复号源（模拟）
+        function restoreAvailability(id) {
+            console.log(`系统已恢复挂号ID=${id}的号源数量`);
+        }
+
+        // 触发通知（模拟）
+        function triggerNotification() {
+            notification.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                notification.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社区医院 - 数据管理中心</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body { background: #f5f7fa; padding: 20px; color: #333; }
+        
+        .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        
+        .header { background: #2c6ed6; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .main { padding: 20px; }
+        .title { font-size: 18px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab { padding: 8px 15px; background: #f5f7fa; border-radius: 4px; cursor: pointer; }
+        .tab.active { background: #2c6ed6; color: white; }
+        
+        .data-grid { display: none; }
+        .data-grid.active { display: block; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f5f7fa; }
+        
+        .btn { padding: 6px 12px; background: #2c6ed6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; margin-right: 5px; }
+        .btn:hover { background: #245abc; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        
+        .form-group { margin-bottom: 15px; }
+        input, select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%; max-width: 300px; }
+        
+        .edit-form { display: none; margin: 20px 0; padding: 20px; background: #f9f9f9; border-radius: 6px; }
+        .edit-form.active { display: block; }
+        
+        .status { display: inline-block; padding: 3px 6px; border-radius: 3px; font-size: 12px; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        .pending { background: #fff3e0; color: #e65100; }
+        
+        .alert { margin: 10px 0; padding: 10px; border-radius: 4px; color: #155724; background-color: #d4edda; display: none; }
+        .alert.active { display: block; }
+        
+        @media (max-width: 600px) {
+            .header { flex-direction: column; gap: 10px; }
+            table th:nth-child(3), table td:nth-child(3) { display: none; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>社区医院数据管理中心</div>
+            <div>数据库存储系统</div>
+        </div>
+
+        <div class="main">
+            <div class="title">数据存储管理</div>
+            
+            <div class="tabs">
+                <div class="tab active" data-target="registrations">挂号记录</div>
+                <div class="tab" data-target="logs">系统日志</div>
+            </div>
+            
+            <!-- 编辑表单 -->
+            <div class="edit-form" id="editForm">
+                <h3 id="editFormTitle">编辑挂号记录</h3>
+                <input type="hidden" id="editId">
+                <input type="hidden" id="editType" value="registration">
+                
+                <div class="form-group">
+                    <label for="editPatient">患者</label>
+                    <input type="text" id="editPatient" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDoctor">医生(科室)</label>
+                    <input type="text" id="editDoctor" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDate">日期</label>
+                    <input type="date" id="editDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editStatus">状态</label>
+                    <select id="editStatus" required>
+                        <option value="已确认">已确认</option>
+                        <option value="待确认">待确认</option>
+                        <option value="已取消">已取消</option>
+                    </select>
+                </div>
+                
+                <div class="alert" id="editAlert"></div>
+                
+                <button class="btn" id="saveEdit">保存</button>
+                <button class="btn btn-secondary" id="cancelEdit">取消</button>
+            </div>
+            
+            <!-- 挂号记录表 -->
+            <div class="data-grid active" id="registrations">
+                <table>
+                    <tr><th>ID</th><th>患者</th><th>医生</th><th>日期</th><th>状态</th><th>操作</th></tr>
+                    <tr><td>1</td><td>张三</td><td>王医生(内科)</td><td>2024-05-20</td><td><span class="status success">已确认</span></td><td><button class="btn edit-btn" data-type="registration" data-id="1">编辑</button></td></tr>
+                    <tr><td>2</td><td>李四</td><td>李医生(儿科)</td><td>2024-05-21</td><td><span class="status success">已确认</span></td><td><button class="btn edit-btn" data-type="registration" data-id="2">编辑</button></td></tr>
+                    <tr><td>3</td><td>王五</td><td>张医生(外科)</td><td>2024-05-22</td><td><span class="status pending">待确认</span></td><td><button class="btn edit-btn" data-type="registration" data-id="3">编辑</button></td></tr>
+                </table>
+                <div class="form-group" style="margin-top:15px;">
+                    <button class="btn" id="addRegistration"><i class="fa fa-plus"></i> 添加挂号记录</button>
+                </div>
+            </div>
+            
+            <!-- 系统日志表 -->
+            <div class="data-grid" id="logs">
+                <table>
+                    <tr><th>ID</th><th>操作</th><th>时间</th><th>操作人员</th></tr>
+                    <tr><td>1</td><td>添加患者挂号记录</td><td>2024-05-18 14:30</td><td>管理员</td></tr>
+                    <tr><td>2</td><td>更新挂号状态</td><td>2024-05-18 15:45</td><td>系统自动</td></tr>
+                    <tr><td>3</td><td>添加患者挂号记录</td><td>2024-05-19 09:15</td><td>管理员</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 标签页切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const target = tab.getAttribute('data-target');
+                document.querySelectorAll('.data-grid').forEach(grid => {
+                    grid.classList.remove('active');
+                });
+                document.getElementById(target).classList.add('active');
+                // 隐藏编辑表单
+                document.getElementById('editForm').classList.remove('active');
+            });
+        });
+        
+        // 编辑按钮点击事件
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.getAttribute('data-type');
+                const id = btn.getAttribute('data-id');
+                const row = btn.closest('tr');
+                
+                // 显示编辑表单
+                const editForm = document.getElementById('editForm');
+                editForm.classList.add('active');
+                
+                // 设置表单标题和类型
+                document.getElementById('editFormTitle').textContent = '编辑挂号记录';
+                document.getElementById('editType').value = type;
+                document.getElementById('editId').value = id;
+                
+                // 填充表单数据
+                document.getElementById('editPatient').value = row.cells[1].textContent;
+                document.getElementById('editDoctor').value = row.cells[2].textContent;
+                document.getElementById('editDate').value = row.cells[3].textContent;
+                
+                // 设置状态
+                const statusText = row.cells[4].textContent.trim();
+                document.getElementById('editStatus').value = statusText;
+                
+                // 滚动到表单
+                editForm.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        
+        // 保存编辑
+        document.getElementById('saveEdit').addEventListener('click', () => {
+            const type = document.getElementById('editType').value;
+            const id = document.getElementById('editId').value;
+            const patient = document.getElementById('editPatient').value;
+            const doctor = document.getElementById('editDoctor').value;
+            
+            if (!patient || !doctor) {
+                showAlert('请填写患者和医生信息');
+                return;
+            }
+            
+            // 找到对应的行
+            const rows = document.querySelectorAll(`#${type}s table tr`);
+            let targetRow = null;
+            
+            rows.forEach(row => {
+                if (row.cells[0] && row.cells[0].textContent === id) {
+                    targetRow = row;
+                }
+            });
+            
+            if (targetRow) {
+                // 更新表格数据
+                targetRow.cells[1].textContent = patient;
+                targetRow.cells[2].textContent = doctor;
+                targetRow.cells[3].textContent = document.getElementById('editDate').value;
+                
+                // 更新状态标签
+                const status = document.getElementById('editStatus').value;
+                const statusClass = status === '已确认' ? 'success' : 'pending';
+                targetRow.cells[4].innerHTML = `<span class="status ${statusClass}">${status}</span>`;
+                
+                // 记录系统日志
+                logAction(`更新挂号记录 (ID: ${id})`);
+                
+                // 显示成功提示
+                showAlert('数据已成功更新到数据库');
+            }
+        });
+        
+        // 取消编辑
+        document.getElementById('cancelEdit').addEventListener('click', () => {
+            document.getElementById('editForm').classList.remove('active');
+            document.getElementById('editAlert').classList.remove('active');
+        });
+        
+        // 添加挂号记录
+        document.getElementById('addRegistration').addEventListener('click', () => {
+            const table = document.querySelector('#registrations table');
+            const newId = table.rows.length;
+            
+            // 创建新行
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${newId}</td>
+                <td>新患者</td>
+                <td>请编辑</td>
+                <td>${new Date().toISOString().split('T')[0]}</td>
+                <td><span class="status pending">待确认</span></td>
+                <td><button class="btn edit-btn" data-type="registration" data-id="${newId}">编辑</button></td>
+            `;
+            table.appendChild(newRow);
+            
+            // 绑定编辑事件
+            newRow.querySelector('.edit-btn').addEventListener('click', function() {
+                const event = new Event('click');
+                this.dispatchEvent(event);
+            });
+            
+            // 记录日志
+            logAction('添加新挂号记录');
+            showAlert('挂号记录已添加，请编辑完善信息');
+        });
+        
+        // 显示提示信息
+        function showAlert(message) {
+            const alert = document.getElementById('editAlert');
+            alert.textContent = message;
+            alert.classList.add('active');
+            
+            setTimeout(() => {
+                alert.classList.remove('active');
+            }, 3000);
+        }
+        
+        // 记录系统日志
+        function logAction(action) {
+            const logTable = document.querySelector('#logs table');
+            const logRow = document.createElement('tr');
+            logRow.innerHTML = `
+                <td>${logTable.rows.length}</td>
+                <td>${action}</td>
+                <td>${new Date().toLocaleString()}</td>
+                <td>管理员</td>
+            `;
+            logTable.appendChild(logRow);
+        }
+    </script>
+</body>
+</html>
+    

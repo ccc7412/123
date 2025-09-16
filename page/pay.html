@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗费用明细与缴费</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        success: '#00B42A',
+                        danger: '#F53F3F'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">医疗费用明细</h2>
+        <div class="bg-white rounded-lg shadow-sm p-5 mb-6">
+            <div class="flex justify-between items-center mb-4 pb-4 border-b">
+                <div>
+                    <h3 class="font-semibold text-gray-800">内科门诊 - 张医生</h3>
+                    <p class="text-sm text-gray-500">就诊日期：2023-06-20</p>
+                </div>
+                <span class="text-sm bg-orange-100 text-orange-600 px-2 py-1 rounded">待缴费</span>
+            </div>
+            
+            <!-- 费用分类 -->
+            <div class="space-y-4 mb-6">
+                <div>
+                    <div class="flex justify-between items-center cursor-pointer fee-category">
+                        <div class="flex items-center">
+                            <i class="fa fa-id-card-o text-primary mr-2"></i>
+                            <h4 class="font-medium">挂号费</h4>
+                        </div>
+                        <div class="flex items-center">
+                            <span>15元</span>
+                            <i class="fa fa-chevron-down text-xs ml-2 text-gray-500"></i>
+                        </div>
+                    </div>
+                    <div class="ml-6 mt-2 text-sm text-gray-600 hidden">
+                        <p>普通门诊挂号费：15元</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center cursor-pointer fee-category">
+                        <div class="flex items-center">
+                            <i class="fa fa-stethoscope text-primary mr-2"></i>
+                            <h4 class="font-medium">诊查费</h4>
+                        </div>
+                        <div class="flex items-center">
+                            <span>30元</span>
+                            <i class="fa fa-chevron-down text-xs ml-2 text-gray-500"></i>
+                        </div>
+                    </div>
+                    <div class="ml-6 mt-2 text-sm text-gray-600 hidden">
+                        <p>主治医师诊查费：30元</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center cursor-pointer fee-category">
+                        <div class="flex items-center">
+                            <i class="fa fa-medkit text-primary mr-2"></i>
+                            <h4 class="font-medium">药品费</h4>
+                        </div>
+                        <div class="flex items-center">
+                            <span>85元</span>
+                            <i class="fa fa-chevron-down text-xs ml-2 text-gray-500"></i>
+                        </div>
+                    </div>
+                    <div class="ml-6 mt-2 text-sm text-gray-600 hidden">
+                        <p>1. 阿司匹林肠溶片：10片/盒，15元</p>
+                        <p>2. 盐酸氨溴索口服溶液：1瓶，35元</p>
+                        <button class="text-primary text-xs mt-1 flex items-center">
+                            <i class="fa fa-file-text-o mr-1"></i> 查看电子处方
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center cursor-pointer fee-category">
+                        <div class="flex items-center">
+                            <i class="fa fa-flask text-primary mr-2"></i>
+                            <h4 class="font-medium">检查检验费</h4>
+                        </div>
+                        <div class="flex items-center">
+                            <span>120元</span>
+                            <i class="fa fa-chevron-down text-xs ml-2 text-gray-500"></i>
+                        </div>
+                    </div>
+                    <div class="ml-6 mt-2 text-sm text-gray-600 hidden">
+                        <p>1. 血常规检查：30元</p>
+                        <p>2. 胸部X线检查：90元</p>
+                        <button class="text-primary text-xs mt-1 flex items-center">
+                            <i class="fa fa-file-o mr-1"></i> 查看检查申请单
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 费用总计 -->
+            <div class="font-medium text-lg mb-4">总计：250元</div>
+            
+            <!-- 支付拆分 -->
+            <div class="bg-gray-50 p-3 rounded-lg text-sm space-y-2 mb-6">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">医保统筹支付：</span>
+                    <span>140元</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">个人账户支付：</span>
+                    <span>60元</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">个人自费：</span>
+                    <span>50元</span>
+                </div>
+                <div class="flex justify-between font-medium pt-2 border-t mt-2">
+                    <span>患者实际支付：</span>
+                    <span class="text-danger">110元</span>
+                </div>
+            </div>
+            
+            <!-- 支付方式选择 -->
+            <div class="mb-6">
+                <h4 class="font-medium mb-3">选择支付方式</h4>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="border-2 border-primary bg-primary/5 rounded-lg p-3 flex flex-col items-center cursor-pointer payment-method active">
+                        <i class="fa fa-credit-card text-primary text-xl mb-1"></i>
+                        <span class="text-sm">微信支付</span>
+                    </div>
+                    <div class="border border-gray-300 rounded-lg p-3 flex flex-col items-center cursor-pointer payment-method">
+                        <i class="fa fa-credit-card text-gray-500 text-xl mb-1"></i>
+                        <span class="text-sm">支付宝</span>
+                    </div>
+                    <div class="border border-gray-300 rounded-lg p-3 flex flex-col items-center cursor-pointer payment-method">
+                        <i class="fa fa-credit-card text-gray-500 text-xl mb-1"></i>
+                        <span class="text-sm">银行卡</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 缴费按钮 -->
+            <button id="payButton" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center">
+                <i class="fa fa-money mr-2"></i> 确认支付 110元
+            </button>
+        </div>
+    </div>
+
+    <!-- 支付成功弹窗 -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa fa-check text-2xl text-success"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">支付成功</h3>
+            <p class="text-gray-600 mb-6">您已成功完成缴费，订单号：P2023062000158</p>
+            <button id="closeModal" class="px-6 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors">
+                完成
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 费用分类展开/折叠
+        document.querySelectorAll('.fee-category').forEach(item => {
+            item.addEventListener('click', function() {
+                const content = this.nextElementSibling;
+                const icon = this.querySelector('.fa-chevron-down');
+                content.classList.toggle('hidden');
+                icon.style.transform = content.classList.contains('hidden') ? 'rotate(0)' : 'rotate(180deg)';
+            });
+        });
+
+        // 支付方式选择
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                document.querySelectorAll('.payment-method').forEach(m => {
+                    m.classList.remove('border-primary', 'bg-primary/5');
+                    m.classList.add('border-gray-300');
+                });
+                this.classList.remove('border-gray-300');
+                this.classList.add('border-primary', 'bg-primary/5');
+            });
+        });
+
+        // 支付功能
+        document.getElementById('payButton').addEventListener('click', function() {
+            document.getElementById('successModal').classList.remove('hidden');
+        });
+
+        // 关闭弹窗
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('successModal').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>

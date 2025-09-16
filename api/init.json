@@ -1,0 +1,138 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "page/welcome-1.html?t=1"
+  },
+  "logoInfo": {
+    "title": "远程挂号系统",
+    "image": "images/logo1.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "社区医院远程挂号系统",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "首页",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "主页",
+              "href": "page/welcome-1.html",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            }
+           
+          ]
+        },
+        {
+          "title": "数据存储与管理",
+          "href": "",
+          "icon": "fa fa-window-maximize",
+          "target": "_self",
+		  "child":[
+			  {
+			    "title": "数据存储",
+			    "href": "page/data store.html",
+			    "icon": "fa fa-list-alt",
+			    "target": "_self"
+			  },
+			  {
+			    "title": "信息管理",
+			    "href": "page/inman.html",
+			    "icon": "fa fa-bar-chart",
+			    "target": "_self"
+			  }
+		  ]
+        },
+        
+        {
+          "title": "医生管理",
+          "href": "page/table.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        },
+        {
+          "title": "通知提醒",
+          "href": "",
+          "icon": "fa fa-calendar",
+          "target": "_self",
+          "child": [
+            {
+              "title": "通知患者",
+              "href": "page/form.html",
+              "icon": "fa fa-list-alt",
+              "target": "_self"
+            },
+            {
+              "title": "通知医生",
+              "href": "page/form-step.html",
+              "icon": "fa fa-navicon",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "用户界面",
+          "href": "",
+          "icon": "fa fa-flag-o",
+          "target": "_self",
+          "child": [
+            {
+              "title": "预约挂号",
+              "href": "page/order.html",
+              "icon": "fa fa-viacoin",
+              "target": "_self"
+            },
+            {
+              "title": "查询挂号记录",
+              "href": "page/search.html",
+              "icon": "fa fa-tags",
+              "target": "_self"
+            }
+          ]
+        },
+        
+        {
+          "title": "挂号业务处理",
+          "href": "",
+          "icon": "fa fa-snowflake-o",
+          "target": "",
+          "child": [
+            {
+              "title": "号源查询",
+              "href": "page/Appointment source.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "挂号登记",
+              "href": "page/layer.html",
+              "icon": "fa fa-shield",
+              "target": "_self"
+            },
+			{
+			  "title": "退号处理",
+			  "href": "page/cancel.html",
+			  "icon": "fa fa-wrench",
+			  "target": "_self"
+			}
+          ]
+        },
+		{
+		  "title": "支付结算",
+		  "href": "page/pay.html",
+		  "icon": "fa fa-file-text",
+		  "target": "_self"
+		}
+      ]
+    }
+   
+
+  ]
+} 

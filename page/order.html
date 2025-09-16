@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>远程挂号系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        neutral: '#F5F7FA',
+                        danger: '#F53F3F'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <main class="container mx-auto px-4 py-6">
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800 mb-6">在线预约挂号</h2>
+        <div class="bg-white rounded-lg p-4 mb-6 card-shadow">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">              
+                <div>
+                    <label class="block text-gray-700 mb-2 font-medium">选择科室</label>
+                    <select id="department" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        <option value="all">全部科室</option>
+                        <option value="internal">内科</option>
+                        <option value="surgery">外科</option>
+                        <option value="pediatrics">儿科</option>
+                        <option value="obstetrics">妇产科</option>
+                        <option value="dermatology">皮肤科</option>
+                        <option value="ophthalmology">眼科</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2 font-medium">选择日期</label>
+                    <div class="flex overflow-x-auto pb-2 gap-2" id="dateSelector">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">可预约医生 <span class="text-sm font-normal text-gray-500">(点击医生卡片查看详情)</span></h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="doctorList">
+            </div>
+        </div>
+    </main>
+    <div id="doctorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-bold text-gray-800" id="modalDoctorName"></h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="doctorDetails" class="space-y-4">
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-100">
+                    <h4 class="font-semibold text-gray-800 mb-3">选择就诊时间</h4>
+                    <div class="grid grid-cols-3 gap-2" id="timeSlots">
+                    </div>
+                    
+                    <button id="bookAppointment" class="mt-6 w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center">
+                        <i class="fa fa-calendar-check-o mr-2"></i> 确认预约
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="successToast" class="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
+        <i class="fa fa-check-circle mr-2"></i>
+        <span>预约成功！</span>
+    </div>
+
+    <script>
+        const doctors = [
+            {
+                id: 1,
+                name: "张医生",
+                title: "主任医师",
+                department: "内科",
+                specialty: "心血管疾病",
+                avatar: "https://picsum.photos/id/1005/200/200",
+                intro: "从事内科临床工作20年，擅长冠心病、高血压等心血管疾病的诊断与治疗。",
+                availableDates: {
+                    "今天": ["09:00", "10:30", "14:00"],
+                    "明天": ["09:00", "15:30"],
+                    "后天": ["10:00", "16:00"]
+                }
+            },
+            {
+                id: 2,
+                name: "李医生",
+                title: "副主任医师",
+                department: "外科",
+                specialty: "普通外科",
+                avatar: "https://picsum.photos/id/1012/200/200",
+                intro: "外科临床经验丰富，擅长疝气、阑尾炎等常见外科手术。",
+                availableDates: {
+                    "今天": ["11:00", "15:00"],
+                    "后天": ["09:30", "14:30"]
+                }
+            },
+            {
+                id: 3,
+                name: "王医生",
+                title: "主治医师",
+                department: "儿科",
+                specialty: "儿童呼吸系统疾病",
+                avatar: "https://picsum.photos/id/1027/200/200",
+                intro: "专注儿科疾病诊疗10年，对儿童哮喘、肺炎等疾病有深入研究。",
+                availableDates: {
+                    "明天": ["08:30", "13:30", "16:30"],
+                    "后天": ["10:30", "15:00"]
+                }
+            },
+            {
+                id: 4,
+                name: "赵医生",
+                title: "主任医师",
+                department: "妇产科",
+                specialty: "妇科肿瘤",
+                avatar: "https://picsum.photos/id/1025/200/200",
+                intro: "国内知名妇产科专家，在妇科肿瘤治疗领域有很高造诣。",
+                availableDates: {
+                    "今天": ["09:30", "14:30"],
+                    "明天": ["10:00", "15:30"]
+                }
+            },
+            {
+                id: 5,
+                name: "陈医生",
+                title: "副主任医师",
+                department: "皮肤科",
+                specialty: "过敏性皮肤病",
+                avatar: "https://picsum.photos/id/1074/200/200",
+                intro: "擅长各类皮肤病的诊断与治疗，尤其在过敏性皮肤病方面经验丰富。",
+                availableDates: {
+                    "今天": ["10:00", "16:00"],
+                    "后天": ["09:00", "14:00"]
+                }
+            },
+            {
+                id: 6,
+                name: "刘医生",
+                title: "主治医师",
+                department: "眼科",
+                specialty: "白内障",
+                avatar: "https://picsum.photos/id/1062/200/200",
+                intro: "眼科临床工作15年，白内障手术经验丰富，成功率高。",
+                availableDates: {
+                    "明天": ["09:00", "11:30", "15:00"],
+                    "后天": ["13:30", "16:30"]
+                }
+            }
+        ];
+        let currentDepartment = "all";
+        let currentDate = "今天";
+        let selectedDoctor = null;
+        let selectedTimeSlot = null;
+        function generateDateOptions() {
+            const dateSelector = document.getElementById('dateSelector');
+            const dates = ["今天", "明天", "后天"];
+            
+            dates.forEach(date => {
+                const dateEl = document.createElement('button');
+                dateEl.className = `px-4 py-2 rounded-full whitespace-nowrap transition-all ${date === currentDate ? 'bg-primary text-white' : 'bg-neutral text-gray-700 hover:bg-gray-200'}`;
+                dateEl.textContent = date;
+                dateEl.addEventListener('click', () => {
+                    currentDate = date;
+                    updateDateButtons();
+                    filterDoctors();
+                });
+                dateSelector.appendChild(dateEl);
+            });
+        }
+        function updateDateButtons() {
+            const dateButtons = document.querySelectorAll('#dateSelector button');
+            dateButtons.forEach(btn => {
+                if (btn.textContent === currentDate) {
+                    btn.className = 'px-4 py-2 rounded-full whitespace-nowrap transition-all bg-primary text-white';
+                } else {
+                    btn.className = 'px-4 py-2 rounded-full whitespace-nowrap transition-all bg-neutral text-gray-700 hover:bg-gray-200';
+                }
+            });
+        }
+        function filterDoctors() {
+            const doctorList = document.getElementById('doctorList');
+            doctorList.innerHTML = '';
+            
+            const filteredDoctors = doctors.filter(doctor => {
+                const departmentMatch = currentDepartment === "all" || doctor.department === currentDepartment;
+                const dateMatch = doctor.availableDates[currentDate] && doctor.availableDates[currentDate].length > 0;
+                return departmentMatch && dateMatch;
+            });
+            
+            if (filteredDoctors.length === 0) {
+                doctorList.innerHTML = '<div class="col-span-full text-center py-10 text-gray-500"><i class="fa fa-search-minus mr-2"></i> 没有找到符合条件的医生</div>';
+                return;
+            }
+            filteredDoctors.forEach(doctor => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg overflow-hidden card-shadow hover:shadow-lg transition-shadow cursor-pointer';
+                card.innerHTML = `
+                    <div class="p-5">
+                        <div class="flex items-start">
+                            <img src="${doctor.avatar}" alt="${doctor.name}医生照片" class="w-20 h-20 rounded-full object-cover mr-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-lg font-semibold text-gray-800">${doctor.name}</h4>
+                                    <span class="bg-blue-100 text-primary text-xs px-2 py-1 rounded-full">${doctor.title}</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mt-1">${doctor.department} · ${doctor.specialty}</p>
+                                <div class="mt-3 flex items-center text-sm text-gray-500">
+                                    <i class="fa fa-calendar-o mr-1"></i>
+                                    <span>可预约: ${doctor.availableDates[currentDate]?.length || 0}个时段</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', () => openDoctorModal(doctor));
+                doctorList.appendChild(card);
+            });
+        }
+        function openDoctorModal(doctor) {
+            selectedDoctor = doctor;
+            selectedTimeSlot = null;
+            
+            document.getElementById('modalDoctorName').textContent = `${doctor.name} ${doctor.title}`;
+            
+            const detailsEl = document.getElementById('doctorDetails');
+            detailsEl.innerHTML = `
+                <div class="flex items-center">
+                    <img src="${doctor.avatar}" alt="${doctor.name}医生照片" class="w-24 h-24 rounded-full object-cover mr-4">
+                    <div>
+                        <p class="text-gray-600"><span class="font-medium text-gray-800">科室:</span> ${doctor.department}</p>
+                        <p class="text-gray-600"><span class="font-medium text-gray-800">专长:</span> ${doctor.specialty}</p>
+                        <p class="text-gray-600 mt-2"><span class="font-medium text-gray-800">简介:</span> ${doctor.intro}</p>
+                    </div>
+                </div>
+            `;
+            const timeSlotsEl = document.getElementById('timeSlots');
+            timeSlotsEl.innerHTML = '';
+            
+            if (doctor.availableDates[currentDate] && doctor.availableDates[currentDate].length > 0) {
+                doctor.availableDates[currentDate].forEach(time => {
+                    const timeEl = document.createElement('button');
+                    timeEl.className = 'border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-primary hover:text-primary transition-colors';
+                    timeEl.textContent = time;
+                    timeEl.addEventListener('click', () => {
+                        selectedTimeSlot = time;
+                        updateTimeSlotButtons();
+                    });
+                    timeSlotsEl.appendChild(timeEl);
+                });
+            } else {
+                timeSlotsEl.innerHTML = '<div class="col-span-full text-center py-4 text-gray-500">该日期暂无可用时段</div>';
+            }
+            
+            document.getElementById('doctorModal').classList.remove('hidden');
+        }
+        function updateTimeSlotButtons() {
+            const timeButtons = document.querySelectorAll('#timeSlots button');
+            timeButtons.forEach(btn => {
+                if (btn.textContent === selectedTimeSlot) {
+                    btn.className = 'border border-primary bg-primary/10 rounded-lg py-2 text-primary font-medium transition-colors';
+                } else {
+                    btn.className = 'border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-primary hover:text-primary transition-colors';
+                }
+            });
+        }
+        function closeModal() {
+            document.getElementById('doctorModal').classList.add('hidden');
+        }
+        function bookAppointment() {
+            if (!selectedTimeSlot) {
+                alert('请选择就诊时间');
+                return;
+            }
+            const toast = document.getElementById('successToast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                closeModal();
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateDateOptions();
+            filterDoctors();
+            document.getElementById('department').addEventListener('change', (e) => {
+                currentDepartment = e.target.value;
+                filterDoctors();
+            });
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('doctorModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('doctorModal')) {
+                    closeModal();
+                }
+            });
+            document.getElementById('bookAppointment').addEventListener('click', bookAppointment);
+        });
+    </script>
+</body>
+</html>
